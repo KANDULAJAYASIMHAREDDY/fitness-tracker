@@ -8,19 +8,7 @@ const app=express();
 const port=process.env.PORT||3333;
 
 //(middlewares)
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json())
 
 
