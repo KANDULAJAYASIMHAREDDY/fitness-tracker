@@ -33,9 +33,14 @@ usersCtrl.register = async (req,res)=>{
 
         await user.save();
 
+        const token = jwt.sign(
+            { userId: user._id, role: user.role },
+            process.env.JWT_SECRET
+        );
+
         const userResponse = user.toObject();
-            delete userResponse.password;
-            res.status(201).json(userResponse);
+        delete userResponse.password;
+        res.status(201).json({ ...userResponse, token });
         
     }
     catch(err){
@@ -84,7 +89,7 @@ usersCtrl.login =async (req,res)=>{
 //Account
 usersCtrl.account =async(req,res)=>{
     try{
-       const user = await User.findById(req.userId).select('password');
+       const user = await User.findById(req.userId).select('-password');
         res.json(user);
     }
     catch(err){
@@ -97,7 +102,7 @@ usersCtrl.account =async(req,res)=>{
 usersCtrl.list = async (req, res) => {
     try {
         // Fetch all users, excluding the password field
-       const users = await User.find().select('password');
+       const users = await User.find().select('-password');
         res.json(users);
     } catch (err) {
         res.status(500).json({ errors: 'Server error  user list.' });
