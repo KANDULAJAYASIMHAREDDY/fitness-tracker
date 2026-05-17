@@ -91,4 +91,15 @@ subscriptionsCtrl.remove = async (req, res) => {
   }
 };
 
+// Get subscriptions by client
+subscriptionsCtrl.clientSubs = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const subs = await Subscription.find({ clientId }).populate(populateAll('Subscription'));
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({ errors: 'Server error' });
+  }
+};
+
 module.exports = subscriptionsCtrl;

@@ -93,4 +93,15 @@ dietPlansCtrl.remove = async (req, res) => {
   }
 };
 
+// Get diet plans by client
+dietPlansCtrl.clientPlans = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const plans = await DietPlan.find({ clientId }).populate(populateAll('Diet'));
+    res.json(plans);
+  } catch (err) {
+    res.status(500).json({ errors: 'Server error' });
+  }
+};
+
 module.exports = dietPlansCtrl;

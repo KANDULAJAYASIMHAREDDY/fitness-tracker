@@ -96,4 +96,15 @@ progressTrackerCtrl.remove = async (req, res) => {
   }
 };
 
+// List progress by client
+progressTrackerCtrl.listByClient = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const list = await ProgressTracker.find({ clientId }).populate(populateAll('Progress'));
+    res.json({ data: list });
+  } catch (err) {
+    res.status(500).json({ errors: 'Server error' });
+  }
+};
+
 module.exports = progressTrackerCtrl;

@@ -17,22 +17,27 @@ workoutPlansCtrl.create = async (req, res) => {
 
     const { trainerId, clientId, title, description, exercises, startDate, endDate, status } = req.body;
 
-    // Check if trainer and client exist
-    const trainer = await Trainer.findById(trainerId);
-    if (!trainer) return res.status(404).json({ errors: 'Trainer not found' });
+    // Auto-detect trainer from token if not provided
+    let resolvedTrainerId = trainerId;
+    if (!resolvedTrainerId) {
+      const trainerDoc = await Trainer.findOne({ userId: req.userId });
+      if (trainerDoc) resolvedTrainerId = trainerDoc._id;
+    }
 
-    const client = await Client.findById(clientId);
-    if (!client) return res.status(404).json({ errors: 'Client not found' });
+    if (resolvedTrainerId) {
+      const trainer = await Trainer.findById(resolvedTrainerId);
+      if (!trainer) return res.status(404).json({ errors: 'Trainer not found' });
+    }
+
+    if (clientId) {
+      const client = await Client.findById(clientId);
+      if (!client) return res.status(404).json({ errors: 'Client not found' });
+    }
 
     const workoutPlan = new WorkoutPlan({
-      trainerId,
-      clientId,
-      title,
-      description,
-      exercises,
-      startDate,
-      endDate,
-      status
+      trainerId: resolvedTrainerId,
+      clientId: clientId || undefined,
+      title, description, exercises, startDate, endDate, status
     });
 
     await workoutPlan.save();
@@ -93,6 +98,17 @@ workoutPlansCtrl.remove = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ errors: 'Server error while deleting plan' });
+  }
+};
+
+// Get plans by client
+workoutPlansCtrl.clientPlans = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const plans = await WorkoutPlan.find({ clientId }).populate(populateAll('Workout'));
+    res.json(plans);
+  } catch (err) {
+    res.status(500).json({ errors: 'Server error' });
   }
 };
 

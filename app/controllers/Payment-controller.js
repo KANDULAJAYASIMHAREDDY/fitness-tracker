@@ -100,4 +100,15 @@ paymentsCtrl.remove = async (req, res) => {
   }
 };
 
+// Get payments by client
+paymentsCtrl.clientPayments = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const payments = await Payment.find({ clientId }).populate(populateAll('Payment'));
+    res.json({ data: payments });
+  } catch (err) {
+    res.status(500).json({ errors: 'Server error' });
+  }
+};
+
 module.exports = paymentsCtrl;
